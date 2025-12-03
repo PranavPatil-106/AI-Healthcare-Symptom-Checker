@@ -7,11 +7,12 @@ import uvicorn
 from dotenv import load_dotenv
 import os
 import json
+import re
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from models import User, SymptomQuery, create_tables, get_db
 from auth import verify_password, get_password_hash, create_access_token, decode_access_token
-from groq import Groq
+import google.generativeai as genai
 
 # Load environment variables
 load_dotenv()
@@ -28,12 +29,11 @@ app = FastAPI(
 # Initialize OAuth2
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-# Initialize Groq client
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-client = None
-if GROQ_API_KEY:
-    client = Groq(api_key=GROQ_API_KEY)
-    model = "llama-3.3-70b-versatile"
+# Initialize Gemini client
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+    model = genai.GenerativeModel('gemini-2.5-flash')
 
 # Pydantic models
 class SymptomRequest(BaseModel):
@@ -71,12 +71,6 @@ class UserResponse(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
-
-import re
-
-# ... (Previous imports)
-
-# ... (Models)
 
 # Auth Helpers
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
@@ -141,7 +135,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
 
 @app.post("/check_symptoms/", response_model=StructuredSymptomResponse)
 async def check_symptoms(request: SymptomRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if not client:
+    if not GEMINI_API_KEY:
         raise HTTPException(status_code=500, detail="LLM Service Unavailable: Missing API Key.")
 
     prompt = f"""
@@ -219,14 +213,20 @@ async def check_symptoms(request: SymptomRequest, current_user: User = Depends(g
     """
     
     try:
-        chat_completion = client.chat.completions.create(
-            messages=[{"role": "user", "content": prompt}],
-            model=model,
-            temperature=0.3,
-            response_format={"type": "json_object"}
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                response_mime_type="application/json"
+            )
         )
+        response_content = response.text
         
-        response_content = chat_completion.choices[0].message.content
+        # Clean up potential markdown code blocks
+        if "```json" in response_content:
+            response_content = response_content.split("```json")[1].split("```")[0].strip()
+        elif "```" in response_content:
+            response_content = response_content.split("```")[1].split("```")[0].strip()
+
         data = json.loads(response_content)
         
         response_obj = StructuredSymptomResponse(**data)
