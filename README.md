@@ -1,116 +1,69 @@
-# Healthcare Symptom Checker
+# AI Healthcare Symptom Checker
 
-A comprehensive healthcare symptom checking application built with FastAPI (backend) and Streamlit (frontend) that leverages LLM technology to provide educational information about possible medical conditions based on user-input symptoms.
+A production-grade, AI-powered symptom checker designed to provide educational medical insights, reasoning, and potential treatments.
 
-## 🚨 Important Medical Disclaimer
+## 🚀 Features
 
-**This tool provides educational information only and is not a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider for any medical concerns. This application does not provide medical diagnoses and should not be used to make decisions about your health.**
+- **AI-Powered Analysis**: Uses advanced LLMs (Llama 3.3 70B) to analyze symptoms.
+- **Explainable AI**: Provides **Reasoning** for every suggestion, explaining *why* a condition matches the symptoms.
+- **Safety First**: Automatically flags potential **Medical Emergencies**.
+- **Cure-Focused**: Explicitly lists simple cures and treatments.
+- **User History**: Tracks past consultations for reference.
+- **Secure**: JWT-based authentication.
 
-## Features
+## 🛠️ Tech Stack
 
-- 🔍 **Symptom Analysis**: Enter your symptoms and receive possible conditions with likelihood assessments
-- 🤖 **AI-Powered Insights**: Uses advanced LLM technology (Google Gemini) for medical education
-- 📚 **Educational Focus**: Provides information for learning purposes, not diagnosis
-- 💾 **Query History**: Stores your previous symptom checks for reference
-- 🛡️ **Safety First**: Comprehensive disclaimers and safety warnings throughout
+- **Backend**: FastAPI (High-performance, Async Python API)
+- **Frontend**: Streamlit (Rapid, interactive UI)
+- **AI Engine**: Groq API (Llama 3.3 70B Versatile)
+- **Database**: SQLite (SQLAlchemy ORM)
 
-## Technical Architecture
+## 📋 Setup & Installation
 
-### Backend (FastAPI)
-- RESTful API for symptom checking
-- LLM integration (Google Gemini Pro)
-- SQLite database for query history
-- Comprehensive error handling and fallbacks
+1.  **Clone the repository**
+    ```bash
+    git clone <repo-url>
+    cd symptom-checker
+    ```
 
-### Frontend (Streamlit)
-- Responsive user interface
-- Symptom input form
-- Results display with expandable sections
-- Query history viewer
+2.  **Configure Environment**
+    Create a `.env` file in the root directory:
+    ```env
+    GROQ_API_KEY=your_groq_api_key_here
+    SECRET_KEY=your_secret_key
+    PORT=9002
+    ```
 
-## Prerequisites
+3.  **Install Dependencies**
+    ```bash
+    pip install -r requirements.txt
+    ```
+    *(Note: Ensure `fastapi`, `uvicorn`, `sqlalchemy`, `streamlit`, `requests`, `python-jose`, `passlib`, `bcrypt`, `groq`, `python-dotenv` are installed)*
 
-- Python 3.8+
-- Google Gemini API key (for LLM integration)
-- pip (Python package manager)
+4.  **Run the Application**
+    
+    **Start Backend**:
+    ```bash
+    python backend/main.py
+    ```
+    
+    **Start Frontend**:
+    ```bash
+    streamlit run frontend/app.py
+    ```
 
-## Installation
+5.  **Access**: Open `http://localhost:8501` in your browser.
 
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd healthcare-symptom-checker
-   ```
+## 🏗️ Architecture
 
-2. Create a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+```mermaid
+graph LR
+    User[User Interface] -- HTTP/JSON --> API[FastAPI Backend]
+    API -- Query --> LLM[Groq AI Engine]
+    API -- Read/Write --> DB[(SQLite Database)]
+    LLM -- Analysis --> API
+    API -- Response --> User
+```
 
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. Set up environment variables:
-   ```bash
-   cp .env.example .env
-   ```
-   Edit `.env` and add your Google Gemini API key:
-   ```
-   GEMINI_API_KEY=your_gemini_api_key_here
-   ```
-
-## Usage
-
-1. Start the backend API:
-   ```bash
-   cd backend
-   python main.py
-   ```
-   The API will be available at `http://localhost:8080`
-
-2. In a new terminal, start the frontend:
-   ```bash
-   cd frontend
-   streamlit run app.py
-   ```
-   The frontend will open in your browser at `http://localhost:8501`
-
-3. Describe your symptoms in the text area and click "Check Symptoms"
-
-## API Endpoints
-
-- `GET /` - Health check endpoint
-- `POST /check_symptoms/` - Submit symptoms for analysis
-- `GET /history/` - Retrieve previous symptom checks
-
-## Data Privacy
-
-- Symptom data is stored locally in SQLite database
-- No data is shared with third parties
-- All processing happens locally (except LLM calls to Google Gemini)
-
-## Limitations & Safety
-
-- **Not a diagnostic tool**: This application does not diagnose medical conditions
-- **Educational purpose only**: Results are for learning, not medical decisions
-- **LLM limitations**: AI responses may contain inaccuracies
-- **Emergency situations**: Always seek immediate care for serious symptoms
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-
-This project is for educational purposes only. It is not intended for clinical use or as a substitute for professional medical advice.
-
-## Contact
-
-For issues or questions, please open an issue in the repository.
+## 🛡️ Disclaimer
+This tool is for **educational purposes only**. It is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.
